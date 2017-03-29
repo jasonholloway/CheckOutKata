@@ -24,7 +24,7 @@ namespace CheckOutKata
 
         public decimal GetPrice(IEnumerable<SKU> skus) {
             var x = new Context {
-                SKUs = new Stack<SKU>(skus.OrderBy(s => s.Char))
+                SKUs = new Stack<SKU>(skus.OrderBy(s => s))
             };
 
             while(x.SKUs.Any()) {
