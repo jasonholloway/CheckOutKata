@@ -46,7 +46,7 @@ namespace CheckOutKata.Tests
 
         public decimal GetPrice(IEnumerable<SKU> skus) {            
             var x = new Context {
-                SKUs = new Stack<SKU>(skus)
+                SKUs = new Stack<SKU>(skus.OrderBy(s => s.Char))
             };
 
             while(x.SKUs.Any()) {
@@ -114,6 +114,21 @@ namespace CheckOutKata.Tests
         }
 
 
+        [Fact(DisplayName = "Pricer sorts SKUs before passing them to strategies")]
+        public void Pricer_SortsSKUs() 
+        {
+            var pricer = new Pricer(
+                            new Offer(x => {
+                                x.SKUs.Select(s => s.Char).ShouldBeInAnyOrder(); //the direction of the ordering doesn't matter to the strategies, 
+                                                                                 //as long as they get chance to greedily consume grouped SKUs (which any ordering will do)
+                                x.SKUs.Clear();                                         
+                                return true;
+                            }));
+            
+            pricer.GetPrice(CreateSKUs('D', 'A', 'C', 'D'));
+        }
+
+        
         
 
         #region bits
