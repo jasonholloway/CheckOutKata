@@ -9,32 +9,11 @@ using Xunit;
 namespace CheckOutKata.Tests
 {
 
-    public struct SKU : IComparable<SKU>, IComparable
-    {
-        public readonly char Char;
-
-        public SKU(char @char) {
-            Char = @char;
-        }
-
-        //equality operators to be overridden here
-        //...
-
-        public int CompareTo(SKU other)
-            => Char.CompareTo(other.Char);
-
-        public int CompareTo(object obj)
-            => obj != null && obj is SKU
-                ? CompareTo((SKU)obj)
-                : throw new InvalidOperationException();
-    }
-
-
     public interface IPricer
     {
         decimal GetPrice(IEnumerable<SKU> skus);
     }
-
+    
 
 
     public delegate bool Offer(Context x);
