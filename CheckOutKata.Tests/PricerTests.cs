@@ -9,13 +9,24 @@ using Xunit;
 namespace CheckOutKata.Tests
 {
 
-    public struct SKU
+    public struct SKU : IComparable<SKU>, IComparable
     {
         public readonly char Char;
 
         public SKU(char @char) {
             Char = @char;
         }
+
+        //equality operators to be overridden here
+        //...
+
+        public int CompareTo(SKU other)
+            => Char.CompareTo(other.Char);
+
+        public int CompareTo(object obj)
+            => obj != null && obj is SKU
+                ? CompareTo((SKU)obj)
+                : throw new InvalidOperationException();
     }
 
 
@@ -84,7 +95,7 @@ namespace CheckOutKata.Tests
 
             price.ShouldBe(6M);
         }
-
+        
 
         static bool DummyOffer(Context x) {
             if(x.SKUs.Pop().Char > 'B') x.TotalPrice += 2;
@@ -117,10 +128,10 @@ namespace CheckOutKata.Tests
         [Fact(DisplayName = "Pricer sorts SKUs before passing them to strategies")]
         public void Pricer_SortsSKUs() 
         {
-            var pricer = new Pricer(
+            var pricer = new Pricer(    //below acts as spy
                             new Offer(x => {
-                                x.SKUs.Select(s => s.Char).ShouldBeInAnyOrder(); //the direction of the ordering doesn't matter to the strategies, 
-                                                                                 //as long as they get chance to greedily consume grouped SKUs (which any ordering will do)
+                                x.SKUs.ShouldBeInAnyOrder(); //the direction of the ordering doesn't matter to the strategies, 
+                                                             //as long as they get chance to greedily consume grouped SKUs (which any ordering will do)
                                 x.SKUs.Clear();                                         
                                 return true;
                             }));
@@ -136,7 +147,7 @@ namespace CheckOutKata.Tests
         SKU[] CreateSKUs(params char[] chars)
             => chars.Select(c => new SKU(c)).ToArray();
 
-
+        
         Offer CreateOffer(char @char, decimal price)
             => CreateOffer(sku => sku.Char == @char, price);
 
@@ -151,6 +162,9 @@ namespace CheckOutKata.Tests
                     return false;
                 }
             };
+
+
+
 
         #endregion
 
