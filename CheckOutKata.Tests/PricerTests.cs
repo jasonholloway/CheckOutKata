@@ -16,7 +16,48 @@ namespace CheckOutKata.Tests
     
 
 
-    public delegate bool Offer(Context x);
+    //public delegate bool Offer(Context x);
+
+    public interface IOffer
+    {
+        bool TryApply(Context x);
+    }
+    
+    public class SingleItemOffer : IOffer
+    {
+        SKU _sku;
+        decimal _price;
+
+        public SingleItemOffer(SKU sku, decimal price) {
+            _sku = sku;
+            _price = price;
+        }
+
+        public bool TryApply(Context x) {
+            if(x.SKUs.Peek().Char == _sku.Char) {   //should do SKU.Equals()...
+                x.SKUs.Pop();
+                x.TotalPrice += _price;
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    public class AdHocOffer : IOffer
+    {
+        Func<Context, bool> _fn;
+
+        public AdHocOffer(Func<Context, bool> fn) {
+            _fn = fn;
+        }
+
+        public bool TryApply(Context x) {
+            return _fn(x);
+        }
+    }
+
+
 
 
     public class Context
@@ -28,9 +69,9 @@ namespace CheckOutKata.Tests
 
     public class Pricer : IPricer
     {
-        Offer[] _offers;
+        IOffer[] _offers;
 
-        public Pricer(params Offer[] offers) {
+        public Pricer(params IOffer[] offers) {
             _offers = offers;
         }
 
@@ -40,8 +81,9 @@ namespace CheckOutKata.Tests
             };
 
             while(x.SKUs.Any()) {
-                _offers.First(fn => fn(x)); //enumerates through offers, executing them till one returns true
-            }                                   //this will also throw if no strategy found
+                var _ = _offers.FirstOrDefault(o => o.TryApply(x)) //enumerates through offers, executing them till one returns true
+                            ?? throw new InvalidOperationException("No suitable offer found for SKU list!");
+            }                                       
 
             return x.TotalPrice;
         }
@@ -67,21 +109,25 @@ namespace CheckOutKata.Tests
         
         [Fact(DisplayName = "Pricer uses single PricingStrategy")]
         public void Pricer_UsesSinglePricingStrategy() {
-            var pricer = new Pricer(DummyOffer);            
+            var pricer = new Pricer(new DummyOffer());            
             var skus = CreateSKUs('A', 'B', 'C', 'D');
 
             var price = pricer.GetPrice(skus);
 
             price.ShouldBe(6M);
         }
-        
 
-        static bool DummyOffer(Context x) {
-            if(x.SKUs.Pop().Char > 'B') x.TotalPrice += 2;
-            else x.TotalPrice += 1;
-            
-            return true;
+
+        class DummyOffer : IOffer
+        {
+            public bool TryApply(Context x) {
+                if(x.SKUs.Pop().Char > 'B') x.TotalPrice += 2;
+                else x.TotalPrice += 1;
+
+                return true;
+            }
         }
+        
 
 
 
@@ -108,7 +154,7 @@ namespace CheckOutKata.Tests
         public void Pricer_SortsSKUs() 
         {
             var pricer = new Pricer(    //below acts as spy
-                            new Offer(x => {
+                            new AdHocOffer(x => {
                                 x.SKUs.ShouldBeInAnyOrder(); //the direction of the ordering doesn't matter to the strategies, 
                                                              //as long as they get chance to greedily consume grouped SKUs (which any ordering will do)
                                 x.SKUs.Clear();                                         
@@ -119,7 +165,16 @@ namespace CheckOutKata.Tests
         }
 
         
-        
+        //[Fact(DisplayName = "offer ")]
+        //public void lkjlkjlkj() 
+        //{
+        //    var pricer = new Pricer(
+        //                    new Offer(x => {
+                                
+        //                    }));
+        //}
+
+
 
         #region bits
 
@@ -127,20 +182,20 @@ namespace CheckOutKata.Tests
             => chars.Select(c => new SKU(c)).ToArray();
 
         
-        Offer CreateOffer(char @char, decimal price)
+        IOffer CreateOffer(char @char, decimal price)
             => CreateOffer(sku => sku.Char == @char, price);
 
-        Offer CreateOffer(Func<SKU, bool> predicate, decimal price)
-            => (Context x) => {
-                if(predicate(x.SKUs.Peek())) {
-                    x.SKUs.Pop();
-                    x.TotalPrice += price;
-                    return true;
-                }
-                else {                    
-                    return false;
-                }
-            };
+        IOffer CreateOffer(Func<SKU, bool> predicate, decimal price)
+            => new AdHocOffer(x => {
+                    if(predicate(x.SKUs.Peek())) {
+                        x.SKUs.Pop();
+                        x.TotalPrice += price;
+                        return true;
+                    }
+                    else {                    
+                        return false;
+                    }
+                });
 
 
 
