@@ -1,0 +1,8 @@
+﻿- wrap SKU in special value type
+	- greater complication? But also makes for best representation of the domain - less information hiding in consuming code
+
+- prices to be decided by strategy pattern - each strategy is a multibuy offer. Strategies will attempt to reduce number down to zero, accumulating total price.
+	- this will happen in a pricing service; outside of this service, we just deal with a bag of SKUs
+	
+- Items have to be ordered before the strategies get to them - put this in the service probably, its part of pricing mechanism
+
