@@ -62,13 +62,15 @@ namespace CheckOutKata.Tests
 
 
     public class PricerTests
-    {        
+    {
+
         [Fact(DisplayName = "Pricer throws when no strategy")]
         public void Pricer_Throws_WhenNoStrategy() {
             var pricer = new Pricer();
+            var skus = CreateSKUs('A', 'B', 'C');
 
             Should.Throw<InvalidOperationException>(() => {
-                pricer.GetPrice(new[] { new SKU('A'), new SKU('B'), new SKU('C') });
+                pricer.GetPrice(skus);
             });         
         }
 
@@ -76,8 +78,9 @@ namespace CheckOutKata.Tests
         [Fact(DisplayName = "Pricer uses single PricingStrategy")]
         public void Pricer_UsesSinglePricingStrategy() {
             var pricer = new Pricer(DummyStrategy);
+            var skus = CreateSKUs('A', 'B', 'C', 'D');
 
-            var price = pricer.GetPrice(new[] { new SKU('A'), new SKU('B'), new SKU('C'), new SKU('D') });
+            var price = pricer.GetPrice(skus);
 
             price.ShouldBe(6M);
         }
@@ -92,6 +95,14 @@ namespace CheckOutKata.Tests
 
 
 
+
+        #region bits
+
+        SKU[] CreateSKUs(params char[] chars)
+            => chars.Select(c => new SKU(c)).ToArray();
+
+        #endregion
+    
 
     }
 }
