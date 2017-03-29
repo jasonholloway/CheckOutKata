@@ -3,7 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheckOutKata", "CheckOutKata.csproj", "{B20BE266-2E60-4ED5-81FB-EDD5FF69A32E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheckOutKata", "CheckOutKata\CheckOutKata.csproj", "{B20BE266-2E60-4ED5-81FB-EDD5FF69A32E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bits", "Bits", "{5E8602B1-2016-4991-8BBB-E999A1D0E9CF}"
+	ProjectSection(SolutionItems) = preProject
+		ideas.txt = ideas.txt
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
