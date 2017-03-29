@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace CheckOutKata
 {
 
-    public struct SKU : IComparable<SKU>, IComparable
+    public struct SKU : IComparable<SKU>, IComparable, IEquatable<SKU>
     {
         public readonly char Char;
 
@@ -15,8 +15,8 @@ namespace CheckOutKata
             Char = @char;
         }
 
-        //equality operators to be overridden here
-        //...
+
+        #region Overrides
 
         public int CompareTo(SKU other)
             => Char.CompareTo(other.Char);
@@ -25,6 +25,26 @@ namespace CheckOutKata
             => obj != null && obj is SKU
                 ? CompareTo((SKU)obj)
                 : throw new InvalidOperationException();
+
+        public bool Equals(SKU other)        
+            => other.Char.Equals(Char);         
+
+        public override int GetHashCode()
+            => Char.GetHashCode();
+
+        public override bool Equals(object obj)
+            => obj != null && obj is SKU
+                ? Equals((SKU)obj)
+                : false;
+
+        public static bool operator ==(SKU a, SKU b)
+            => a.Equals(b);
+
+        public static bool operator !=(SKU a, SKU b)
+            => !a.Equals(b);
+
+        #endregion
+
     }
 
 }

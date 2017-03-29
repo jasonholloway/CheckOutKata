@@ -32,7 +32,7 @@ namespace CheckOutKata
         }
 
         public bool TryApply(Context x) {
-            if(x.SKUs.Peek().Char == _sku.Char) {   //should do SKU.Equals()...
+            if(x.SKUs.Peek() == _sku) {   //should do SKU.Equals()...
                 x.SKUs.Pop();
                 x.TotalPrice += _price;
                 return true;
@@ -69,7 +69,7 @@ namespace CheckOutKata
         }
 
         public bool TryApply(Context x) {
-            var span = x.SKUs.TakeWhile(s => s.Char == _sku.Char).ToArray();
+            var span = x.SKUs.TakeWhile(s => s == _sku).ToArray();
 
             if(span.Length >= _quantity) {
                 x.TotalPrice += _price;
