@@ -164,15 +164,51 @@ namespace CheckOutKata.Tests
             pricer.GetPrice(CreateSKUs('D', 'A', 'C', 'D'));
         }
 
-        
-        //[Fact(DisplayName = "offer ")]
-        //public void lkjlkjlkj() 
-        //{
-        //    var pricer = new Pricer(
-        //                    new Offer(x => {
-                                
-        //                    }));
-        //}
+
+
+
+
+        [Fact(DisplayName = "MultiBuyOffer picks out specified number of same SKU, yields to lower strategy if too few")]
+        public void MultiBuyOffer_PicksSpecifiedNumberOfSKU() {
+            var pricer = new Pricer(
+                            new MultiBuyOffer(new SKU('A'), 3, 10M),
+                            new SingleItemOffer(new SKU('A'), 4M)
+                            );
+
+            var price = pricer.GetPrice(CreateSKUs('A', 'A', 'A', 'A'));
+
+            price.ShouldBe(14M);            
+        }
+
+
+
+        public class MultiBuyOffer : IOffer
+        {
+            SKU _sku;
+            int _quantity;
+            decimal _price;
+
+            public MultiBuyOffer(SKU sku, int quantity, decimal price) {
+                _sku = sku;
+                _quantity = quantity;
+                _price = price;
+            }
+
+            public bool TryApply(Context x) 
+            {                
+                var span = x.SKUs.TakeWhile(s => s.Char == _sku.Char).ToArray();
+
+                if(span.Length >= _quantity) {
+                    x.TotalPrice += _price;
+                    x.SKUs.PopMany(_quantity);
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+
 
 
 
