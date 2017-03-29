@@ -15,10 +15,10 @@ namespace CheckOutKata.Tests
         [Fact(DisplayName = "Pricer throws when no strategy")]
         public void Pricer_Throws_WhenNoStrategy() {
             var pricer = new Pricer();
-            var skus = CreateSKUs('A', 'B', 'C');
+            var basket = CreateBasket('A', 'B', 'C');
 
             Should.Throw<InvalidOperationException>(() => {
-                pricer.GetPrice(skus);
+                pricer.GetPrice(basket);
             });         
         }
 
@@ -26,9 +26,9 @@ namespace CheckOutKata.Tests
         [Fact(DisplayName = "Pricer uses single PricingStrategy")]
         public void Pricer_UsesSinglePricingStrategy() {
             var pricer = new Pricer(new DummyOffer());            
-            var skus = CreateSKUs('A', 'B', 'C', 'D');
+            var basket = CreateBasket('A', 'B', 'C', 'D');
 
-            var price = pricer.GetPrice(skus);
+            var price = pricer.GetPrice(basket);
 
             price.ShouldBe(6M);
         }
@@ -58,9 +58,9 @@ namespace CheckOutKata.Tests
                             CreateOffer('D', 4)
                             );
 
-            var skus = CreateSKUs('A', 'A', 'C', 'D');
+            var basket = CreateBasket('A', 'A', 'C', 'D');
 
-            var price = pricer.GetPrice(skus);
+            var price = pricer.GetPrice(basket);
 
             price.ShouldBe(9);
         }
@@ -76,8 +76,10 @@ namespace CheckOutKata.Tests
                                 x.SKUs.Clear();                                         
                                 return true;
                             }));
-            
-            pricer.GetPrice(CreateSKUs('D', 'A', 'C', 'D'));
+
+            var basket = CreateBasket('D', 'A', 'C', 'D');
+
+            pricer.GetPrice(basket);
         }
 
 
@@ -91,18 +93,22 @@ namespace CheckOutKata.Tests
                             new SingleItemOffer(new SKU('A'), 4M)
                             );
 
-            var price = pricer.GetPrice(CreateSKUs('A', 'A', 'A', 'A'));
+            var price = pricer.GetPrice(CreateBasket('A', 'A', 'A', 'A'));
 
             price.ShouldBe(14M);            
         }
 
         
-
+        
 
         #region bits
 
+
         SKU[] CreateSKUs(params char[] chars)
             => chars.Select(c => new SKU(c)).ToArray();
+
+        Basket CreateBasket(params char[] chars)
+            => new Basket(CreateSKUs(chars));
 
         
         IOffer CreateOffer(char @char, decimal price)

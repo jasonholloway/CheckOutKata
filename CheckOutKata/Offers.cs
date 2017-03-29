@@ -15,6 +15,7 @@ namespace CheckOutKata
 
     public class Context
     {
+        public Basket Basket;
         public Stack<SKU> SKUs = new Stack<SKU>(); //simpler to use Stack for time being
         public decimal TotalPrice = 0M;
     }

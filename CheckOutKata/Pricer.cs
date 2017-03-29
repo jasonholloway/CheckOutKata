@@ -9,7 +9,17 @@ namespace CheckOutKata
 
     public interface IPricer
     {
-        decimal GetPrice(IEnumerable<SKU> skus);
+        decimal GetPrice(Basket basket);
+    }
+
+
+    public class Basket
+    {
+        public readonly IEnumerable<SKU> SKUs;
+
+        public Basket(IEnumerable<SKU> skus) {
+            SKUs = skus;
+        }
     }
 
 
@@ -22,9 +32,10 @@ namespace CheckOutKata
             _offers = offers;
         }
 
-        public decimal GetPrice(IEnumerable<SKU> skus) {
+        public decimal GetPrice(Basket basket) {
             var x = new Context {
-                SKUs = new Stack<SKU>(skus.OrderBy(s => s))
+                Basket = basket,
+                SKUs = new Stack<SKU>(basket.SKUs.OrderBy(s => s))
             };
 
             while(x.SKUs.Any()) {
