@@ -9,7 +9,7 @@ using Xunit;
 namespace CheckOutKata.Tests
 {
 
-    public class CheckoutTests
+    public class CheckOutTests
     {        
         [Fact(DisplayName = "Blah")]
         public void Blah() {            
