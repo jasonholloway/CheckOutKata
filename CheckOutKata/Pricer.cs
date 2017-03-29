@@ -26,11 +26,15 @@ namespace CheckOutKata
 
     public class Pricer : IPricer
     {
-        IOffer[] _offers;
-
-        public Pricer(params IOffer[] offers) {
-            _offers = offers;
+        Func<IEnumerable<IOffer>> _fnOffers;
+                
+        public Pricer(Func<IEnumerable<IOffer>> fnOffers) {
+            _fnOffers = fnOffers;
         }
+
+        public Pricer(params IOffer[] offers)
+            : this(() => offers) { }
+
 
         public decimal GetPrice(Basket basket) {
             var x = new Context {
@@ -38,9 +42,15 @@ namespace CheckOutKata
                 SKUs = new Stack<SKU>(basket.SKUs.OrderBy(s => s))
             };
 
+            var offers = _fnOffers();
+
             while(x.SKUs.Any()) {
-                var _ = _offers.FirstOrDefault(o => o.TryApply(x)) //enumerates through offers, executing them till one returns true
-                            ?? throw new InvalidOperationException("No suitable offer found for SKU list!");
+                //enumerates through offers, executing them till one returns true
+                var found = offers.FirstOrDefault(o => o.TryApply(x)) != null; 
+
+                if(!found) {
+                    throw new InvalidOperationException("No suitable offer found for SKU list!");
+                }                    
             }
 
             return x.TotalPrice;

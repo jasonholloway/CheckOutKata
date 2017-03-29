@@ -87,7 +87,8 @@ namespace CheckOutKata.Tests
 
 
         [Fact(DisplayName = "MultiBuyOffer picks out specified number of same SKU, yields to lower strategy if too few")]
-        public void MultiBuyOffer_PicksSpecifiedNumberOfSKU() {
+        public void MultiBuyOffer_PicksSpecifiedNumberOfSKU() 
+        {
             var pricer = new Pricer(
                             new MultiBuyOffer(new SKU('A'), 3, 10M),
                             new SingleItemOffer(new SKU('A'), 4M)
@@ -99,7 +100,32 @@ namespace CheckOutKata.Tests
         }
 
         
+
         
+        
+        [Fact(DisplayName = "Pricer gets latest offers")]
+        public void Pricer_GetsLatestOffers() 
+        {
+            var offers = new List<IOffer>(new[] {                
+                new SingleItemOffer(new SKU('A'), 3M),
+                new SingleItemOffer(new SKU('B'), 1M)
+            });
+            
+            var pricer = new Pricer(() => offers);
+
+            var basket = CreateBasket('A', 'B', 'A');
+            
+            var price1 = pricer.GetPrice(basket);
+            price1.ShouldBe(7M);
+
+            offers.Insert(0, new MultiBuyOffer(new SKU('A'), 2, 5M));
+
+            var price2 = pricer.GetPrice(basket);
+            price2.ShouldBe(6M);
+        }
+
+
+
 
         #region bits
 
