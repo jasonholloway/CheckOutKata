@@ -26,7 +26,7 @@ namespace CheckOutKata.Tests
 
 
 
-    public delegate bool PricingStrategy(Context x);
+    public delegate bool Offer(Context x);
 
 
     public class Context
@@ -38,10 +38,10 @@ namespace CheckOutKata.Tests
 
     public class Pricer : IPricer
     {
-        PricingStrategy[] _strategies;
+        Offer[] _offers;
 
-        public Pricer(params PricingStrategy[] strategies) {
-            _strategies = strategies;
+        public Pricer(params Offer[] offers) {
+            _offers = offers;
         }
 
         public decimal GetPrice(IEnumerable<SKU> skus) {            
@@ -50,7 +50,7 @@ namespace CheckOutKata.Tests
             };
 
             while(x.SKUs.Any()) {
-                _strategies.First(fn => fn(x)); //enumerates through strategies, executing them till one returns true
+                _offers.First(fn => fn(x)); //enumerates through offers, executing them till one returns true
             }                                   //this will also throw if no strategy found
 
             return x.TotalPrice;
@@ -77,7 +77,7 @@ namespace CheckOutKata.Tests
         
         [Fact(DisplayName = "Pricer uses single PricingStrategy")]
         public void Pricer_UsesSinglePricingStrategy() {
-            var pricer = new Pricer(DummyStrategy);
+            var pricer = new Pricer(DummyOffer);            
             var skus = CreateSKUs('A', 'B', 'C', 'D');
 
             var price = pricer.GetPrice(skus);
@@ -86,7 +86,7 @@ namespace CheckOutKata.Tests
         }
 
 
-        static bool DummyStrategy(Context x) {
+        static bool DummyOffer(Context x) {
             if(x.SKUs.Pop().Char > 'B') x.TotalPrice += 2;
             else x.TotalPrice += 1;
             
@@ -113,30 +113,32 @@ namespace CheckOutKata.Tests
             price.ShouldBe(9);
         }
 
-        static PricingStrategy CreateOffer(char c, decimal price)
-            => (Context x) => {
-                    if(x.SKUs.Peek().Char == c) {
-                        x.SKUs.Pop();
-                        x.TotalPrice += price;
-                        return true;
-                    }
-                    else {
-                        return false;
-                    }
-                };
 
-
-
-
-
+        
 
         #region bits
 
         SKU[] CreateSKUs(params char[] chars)
             => chars.Select(c => new SKU(c)).ToArray();
 
+
+        Offer CreateOffer(char @char, decimal price)
+            => CreateOffer(sku => sku.Char == @char, price);
+
+        Offer CreateOffer(Func<SKU, bool> predicate, decimal price)
+            => (Context x) => {
+                if(predicate(x.SKUs.Peek())) {
+                    x.SKUs.Pop();
+                    x.TotalPrice += price;
+                    return true;
+                }
+                else {                    
+                    return false;
+                }
+            };
+
         #endregion
-    
+
 
     }
 }
