@@ -6,3 +6,10 @@
 	
 - Items have to be ordered before the strategies get to them - put this in the service probably, its part of pricing mechanism
 
+-------------
+
+Pricing strategies won't necessarily relate to single products only - each strategy must be let loose on the entire list of
+SKUs to decide whether it applies or not. Bottom priority would be simple SingleItemOffer, one for each SKU. In the middle 
+would be MultiItemOffer, which would take items of a single type but in variable quantities. 
+
+So we can proceed by supporting simple strategies first, and then moving outwards.
