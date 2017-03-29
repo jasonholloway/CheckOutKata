@@ -96,6 +96,40 @@ namespace CheckOutKata.Tests
 
 
 
+        [Fact(DisplayName = "Pricer uses multiple PricingStrategies")]
+        public void Pricer_UsesMultiplePricingStrategies() 
+        {
+            var pricer = new Pricer(
+                            CreateOffer('A', 1),
+                            CreateOffer('B', 2),
+                            CreateOffer('C', 3),
+                            CreateOffer('D', 4)
+                            );
+
+            var skus = CreateSKUs('A', 'A', 'C', 'D');
+
+            var price = pricer.GetPrice(skus);
+
+            price.ShouldBe(9);
+        }
+
+        static PricingStrategy CreateOffer(char c, decimal price)
+            => (Context x) => {
+                    if(x.SKUs.Peek().Char == c) {
+                        x.SKUs.Pop();
+                        x.TotalPrice += price;
+                        return true;
+                    }
+                    else {
+                        return false;
+                    }
+                };
+
+
+
+
+
+
         #region bits
 
         SKU[] CreateSKUs(params char[] chars)
