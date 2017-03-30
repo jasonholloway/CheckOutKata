@@ -70,9 +70,9 @@ namespace CheckOutKata
         }
 
         public bool TryApply(Context x) {
-            var span = x.SKUs.TakeWhile(s => s == _sku).ToArray();
+            var spanLength = x.SKUs.TakeWhile(s => s == _sku).Count();
 
-            if(span.Length >= _quantity) {
+            if(spanLength >= _quantity) {
                 x.TotalPrice += _price;
                 x.SKUs.PopMany(_quantity);
                 return true;
